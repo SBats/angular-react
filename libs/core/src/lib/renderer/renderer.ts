@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Injectable, Renderer2, RendererStyleFlags2, RendererType2 } from '@angular/core';
+import { Injectable, Renderer2, RendererStyleFlags2, RendererType2, Inject } from '@angular/core';
 import { EventManager, ɵDomRendererFactory2, ɵDomSharedStylesHost } from '@angular/platform-browser';
 import { StringMap } from '../declarations/string-map';
 import { Disguise } from './components/Disguise';
@@ -9,6 +9,9 @@ import { ReactContent } from './react-content';
 import { isReactNode, ReactNode } from './react-node';
 import { registerElement } from './registry';
 import './geteventlisteners';
+
+import { angularReactRendererConfig, AngularReactRendererConfig } from './angular-react-renderer-config';
+import * as ReactDOM from 'react-dom';
 
 const DEBUG = false;
 
@@ -33,7 +36,11 @@ export class AngularReactRendererFactory extends ɵDomRendererFactory2 {
     this.isRenderPending = true;
   };
 
-  constructor(eventManager: EventManager, sharedStylesHost: ɵDomSharedStylesHost) {
+  constructor(
+    eventManager: EventManager,
+    sharedStylesHost: ɵDomSharedStylesHost,
+    @Inject(angularReactRendererConfig) private config: AngularReactRendererConfig
+  ) {
     super(eventManager, sharedStylesHost, 'app-id');
 
     // tslint:disable-next-line: no-use-before-declare
@@ -67,6 +74,17 @@ export class AngularReactRendererFactory extends ɵDomRendererFactory2 {
     if (this.isRenderPending) {
       // Remove root nodes that are pending destroy after render.
       this.reactRootNodes = new Set(Array.from(this.reactRootNodes).filter(node => !node.render().destroyPending));
+
+      ReactDOM.render(
+        this.config.reactRoot({
+          children: Array.from(this.reactRootNodes),
+          injector: this.config.injector,
+        }),
+        this.config.container
+      );
+
+      this.reactRootNodes.forEach(reactNode => reactNode.setRendered());
+
       this.isRenderPending = false;
     }
   }

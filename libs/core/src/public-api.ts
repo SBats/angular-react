@@ -15,3 +15,8 @@ export {
   InputRendererOptions,
   RenderPropOptions,
 } from './lib/components/render-props';
+export {
+  AngularReactRendererConfig,
+  angularReactRendererConfig,
+  ReactRootProps,
+} from './lib/renderer/angular-react-renderer-config';

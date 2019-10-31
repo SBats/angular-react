@@ -58,6 +58,10 @@ export class ReactNode {
     return this._isDestroyPending;
   }
 
+  get renderPending() {
+    return this._isRenderPending;
+  }
+
   constructor(private type?: React.ReactType | string) {
     this.setRenderPending();
     this._tryResolveTypeIsReactElementClass();
@@ -73,6 +77,10 @@ export class ReactNode {
   setRenderPending() {
     this.setRenderPendingCallback();
     this._isRenderPending = true;
+  }
+
+  setRendered() {
+    this._isRenderPending = false;
   }
 
   /**
